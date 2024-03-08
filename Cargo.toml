@@ -11,3 +11,27 @@ pedantic = "deny"
 #cargo = "deny"
 #restriction = "deny"
 #nursery = "deny"
+
+[dependencies]
+async-std = "1.12.0"
+chrono = "0.4.31"
+env_logger = "0.10.0"
+up-rust = { git = "https://github.com/eclipse-uprotocol/up-rust", rev = "68c8a1d94f0006daf4ba135c9cbbfddcd793108d" }
+up-client-zenoh = { git = "https://github.com/eclipse-uprotocol/up-client-zenoh-rust", rev = "17599bbd17abeb33ce7419b48f332f14f6320f0a" }
+zenoh = { version = "0.10.1-rc", features = ["unstable"]}
+
+[[bin]]
+name = "publisher"
+path = "src/publisher.rs"
+
+[[bin]]
+name = "subscriber"
+path = "src/subscriber.rs"
+
+[[bin]]
+name = "rpc_client"
+path = "src/rpc_client.rs"
+
+[[bin]]
+name = "rpc_server"
+path = "src/rpc_server.rs"
