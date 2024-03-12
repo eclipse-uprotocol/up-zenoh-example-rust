@@ -1,8 +1,8 @@
 # up-zenoh-example-rust
 
-Example code for zenoh using [up-client-zenoh-rust](https://github.com/eclipse-uprotocol/up-client-zenoh-rust)
+Example code of using [up-client-zenoh-rust](https://github.com/eclipse-uprotocol/up-client-zenoh-rust)
 
-# Build
+## Build
 
 ```shell
 # Check clippy
@@ -11,7 +11,7 @@ cargo clippy --all-targets
 cargo build
 ```
 
-# Examples
+## Run examples
 
 ```shell
 # Publisher
