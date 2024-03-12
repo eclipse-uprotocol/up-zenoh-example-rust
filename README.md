@@ -15,11 +15,11 @@ cargo build
 
 ```shell
 # Publisher
-cargo run --example publisher
+cargo run --bin publisher
 # Subscriber
-cargo run --example subscriber
+cargo run --bin subscriber
 # RPC Server
-cargo run --example rpc_server
+cargo run --bin rpc_server
 # RPC Client
-cargo run --example rpc_client
+cargo run --bin rpc_client
 ```
