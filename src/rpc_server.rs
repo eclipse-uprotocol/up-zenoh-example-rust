@@ -32,7 +32,6 @@ async fn main() {
     let rpc_server = Arc::new(UPClientZenoh::new(Config::default()).await.unwrap());
 
     // create uuri
-    // TODO: Need to check whether the way to create ID is correct?
     let uuri = UUri {
         entity: Some(UEntity {
             name: "test_rpc.app".to_string(),

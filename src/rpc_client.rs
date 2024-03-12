@@ -28,7 +28,6 @@ async fn main() {
     let rpc_client = UPClientZenoh::new(Config::default()).await.unwrap();
 
     // create uuri
-    // TODO: Need to check whether the way to create ID is correct?
     let uuri = UUri {
         entity: Some(UEntity {
             name: "test_rpc.app".to_string(),
@@ -44,13 +43,6 @@ async fn main() {
         .into(),
         ..Default::default()
     };
-
-    // TODO: Need to check whether we don't need uattributes.
-    // create uattributes
-    //// TODO: Check TTL (Should TTL map to Zenoh's timeout?)
-    //let attributes = UAttributesBuilder::request(UPriority::UPRIORITY_CS4, uuri.clone(), 100)
-    //    .with_reqid(UUIDv8Builder::new().build())
-    //    .build();
 
     // create uPayload
     let data = String::from("GetCurrentTime");

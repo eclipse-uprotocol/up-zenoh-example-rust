@@ -42,7 +42,6 @@ async fn main() {
     let subscriber = UPClientZenoh::new(Config::default()).await.unwrap();
 
     // create uuri
-    // TODO: Need to check whether the way to create ID is correct?
     let uuri = UUri {
         entity: Some(UEntity {
             name: "body.access".to_string(),
