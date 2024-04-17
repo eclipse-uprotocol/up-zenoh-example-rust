@@ -18,9 +18,7 @@ async-trait = "0.1"
 chrono = "0.4.31"
 env_logger = "0.10.0"
 up-rust = { git = "https://github.com/eclipse-uprotocol/up-rust", rev = "c705ac97602ad6917a93d23651e8a504ec7bb718" }
-# TODO: Should be removed after up-client-zenoh is updated
-up-client-zenoh = { git = "https://github.com/ZettaScaleLabs/up-client-zenoh-rust.git", branch = "update_up_rust" }
-#up-client-zenoh = { git = "https://github.com/eclipse-uprotocol/up-client-zenoh-rust", rev = "8855b9abd4bd27228d30d9061522194f330fa547" }
+up-client-zenoh = { git = "https://github.com/eclipse-uprotocol/up-client-zenoh-rust", rev = "dc0a3a95564ab1c83771fe71f0da5a261d469fb6" }
 zenoh = { version = "0.10.1-rc", features = ["unstable"]}
 
 [[bin]]
