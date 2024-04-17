@@ -11,14 +11,17 @@
 // Contributors:
 //   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 //
+pub mod common_uuri;
+
 use async_std::task::{self, block_on};
 use async_trait::async_trait;
 use chrono::Utc;
+use common_uuri::ExampleType;
 use std::{sync::Arc, time};
 use up_client_zenoh::UPClientZenoh;
 use up_rust::{
-    Data, Number, UAuthority, UEntity, UListener, UMessage, UMessageBuilder, UPayloadFormat,
-    UResourceBuilder, UStatus, UTransport, UUIDBuilder, UUri,
+    Data, UListener, UMessage, UMessageBuilder, UPayloadFormat, UStatus, UTransport, UUIDBuilder,
+    UUri,
 };
 use zenoh::config::Config;
 
@@ -70,18 +73,8 @@ async fn main() {
     let rpc_server = Arc::new(
         UPClientZenoh::new(
             Config::default(),
-            UAuthority {
-                name: Some("auth_name".to_string()),
-                number: Some(Number::Id(vec![1, 2, 3, 4])),
-                ..Default::default()
-            },
-            UEntity {
-                name: "entity_rpc_server".to_string(),
-                id: Some(3),
-                version_major: Some(1),
-                version_minor: None,
-                ..Default::default()
-            },
+            common_uuri::authority(),
+            common_uuri::entity(&ExampleType::RpcServer),
         )
         .await
         .unwrap(),
@@ -89,18 +82,8 @@ async fn main() {
 
     // create uuri
     let uuri = UUri {
-        entity: Some(UEntity {
-            name: "test_rpc.app".to_string(),
-            version_major: Some(1),
-            id: Some(1234),
-            ..Default::default()
-        })
-        .into(),
-        resource: Some(UResourceBuilder::for_rpc_request(
-            Some("getTime".to_string()),
-            Some(5678),
-        ))
-        .into(),
+        entity: Some(common_uuri::entity(&ExampleType::RpcServer)).into(),
+        resource: Some(common_uuri::rpc_resource()).into(),
         ..Default::default()
     };
 

@@ -11,11 +11,11 @@
 // Contributors:
 //   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 //
+pub mod common_uuri;
+
+use common_uuri::ExampleType;
 use up_client_zenoh::UPClientZenoh;
-use up_rust::{
-    CallOptions, Data, Number, RpcClient, UAuthority, UEntity, UPayload, UPayloadFormat,
-    UResourceBuilder, UUri,
-};
+use up_rust::{CallOptions, Data, RpcClient, UPayload, UPayloadFormat, UUri};
 use zenoh::config::Config;
 
 #[async_std::main]
@@ -26,36 +26,16 @@ async fn main() {
     println!("uProtocol RPC client example");
     let rpc_client = UPClientZenoh::new(
         Config::default(),
-        UAuthority {
-            name: Some("auth_name".to_string()),
-            number: Some(Number::Id(vec![1, 2, 3, 4])),
-            ..Default::default()
-        },
-        UEntity {
-            name: "entity_rpc_client".to_string(),
-            id: Some(4),
-            version_major: Some(1),
-            version_minor: None,
-            ..Default::default()
-        },
+        common_uuri::authority(),
+        common_uuri::entity(&ExampleType::RpcClient),
     )
     .await
     .unwrap();
 
     // create uuri
     let uuri = UUri {
-        entity: Some(UEntity {
-            name: "test_rpc.app".to_string(),
-            version_major: Some(1),
-            id: Some(1234),
-            ..Default::default()
-        })
-        .into(),
-        resource: Some(UResourceBuilder::for_rpc_request(
-            Some("getTime".to_string()),
-            Some(5678),
-        ))
-        .into(),
+        entity: Some(common_uuri::entity(&ExampleType::RpcServer)).into(),
+        resource: Some(common_uuri::rpc_resource()).into(),
         ..Default::default()
     };
 

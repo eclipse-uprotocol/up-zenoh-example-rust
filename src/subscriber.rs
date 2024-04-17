@@ -11,13 +11,14 @@
 // Contributors:
 //   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 //
+pub mod common_uuri;
+
 use async_std::task;
 use async_trait::async_trait;
+use common_uuri::ExampleType;
 use std::{sync::Arc, time};
 use up_client_zenoh::UPClientZenoh;
-use up_rust::{
-    Data, Number, UAuthority, UEntity, UListener, UMessage, UResource, UStatus, UTransport, UUri,
-};
+use up_rust::{Data, UListener, UMessage, UStatus, UTransport, UUri};
 use zenoh::config::Config;
 
 struct SubscriberListener;
@@ -43,39 +44,16 @@ async fn main() {
     println!("uProtocol subscriber example");
     let subscriber = UPClientZenoh::new(
         Config::default(),
-        UAuthority {
-            name: Some("auth_name".to_string()),
-            number: Some(Number::Id(vec![1, 2, 3, 4])),
-            ..Default::default()
-        },
-        UEntity {
-            name: "entity_sub".to_string(),
-            id: Some(2),
-            version_major: Some(1),
-            version_minor: None,
-            ..Default::default()
-        },
+        common_uuri::authority(),
+        common_uuri::entity(&ExampleType::Subscriber),
     )
     .await
     .unwrap();
 
     // create uuri
     let uuri = UUri {
-        entity: Some(UEntity {
-            name: "body.access".to_string(),
-            version_major: Some(1),
-            id: Some(1234),
-            ..Default::default()
-        })
-        .into(),
-        resource: Some(UResource {
-            name: "door".to_string(),
-            instance: Some("front_left".to_string()),
-            message: Some("Door".to_string()),
-            id: Some(5678),
-            ..Default::default()
-        })
-        .into(),
+        entity: Some(common_uuri::entity(&ExampleType::Publisher)).into(),
+        resource: Some(common_uuri::pub_resource()).into(),
         ..Default::default()
     };
 
