@@ -15,9 +15,8 @@ use async_std::task;
 use std::time;
 use up_client_zenoh::UPClientZenoh;
 use up_rust::{
-    transport::{builder::UMessageBuilder, datamodel::UTransport},
-    uprotocol::{UEntity, UPayloadFormat, UResource, UUri},
-    uuid::builder::UUIDBuilder,
+    Number, UAuthority, UEntity, UMessageBuilder, UPayloadFormat, UResource, UTransport,
+    UUIDBuilder, UUri,
 };
 use zenoh::config::Config;
 
@@ -27,7 +26,23 @@ async fn main() {
     env_logger::init();
 
     println!("uProtocol publisher example");
-    let publisher = UPClientZenoh::new(Config::default()).await.unwrap();
+    let publisher = UPClientZenoh::new(
+        Config::default(),
+        UAuthority {
+            name: Some("auth_name".to_string()),
+            number: Some(Number::Id(vec![1, 2, 3, 4])),
+            ..Default::default()
+        },
+        UEntity {
+            name: "entity_pub".to_string(),
+            id: Some(1),
+            version_major: Some(1),
+            version_minor: None,
+            ..Default::default()
+        },
+    )
+    .await
+    .unwrap();
 
     // create uuri
     let uuri = UUri {
@@ -52,9 +67,9 @@ async fn main() {
     let mut cnt: u64 = 0;
     loop {
         let data = format!("{cnt}");
-        let umessage = UMessageBuilder::publish(&uuri)
+        let umessage = UMessageBuilder::publish(uuri.clone())
+            .with_message_id(UUIDBuilder::build())
             .build_with_payload(
-                &UUIDBuilder::new(),
                 data.as_bytes().to_vec().into(),
                 UPayloadFormat::UPAYLOAD_FORMAT_TEXT,
             )

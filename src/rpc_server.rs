@@ -12,16 +12,54 @@
 //   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 //
 use async_std::task::{self, block_on};
+use async_trait::async_trait;
 use chrono::Utc;
 use std::{sync::Arc, time};
 use up_client_zenoh::UPClientZenoh;
 use up_rust::{
-    rpc::RpcServer,
-    transport::datamodel::UTransport,
-    uprotocol::{Data, UEntity, UMessage, UMessageType, UPayload, UPayloadFormat, UStatus, UUri},
-    uri::builder::resourcebuilder::UResourceBuilder,
+    Data, Number, UAuthority, UEntity, UListener, UMessage, UMessageBuilder, UPayloadFormat,
+    UResourceBuilder, UStatus, UTransport, UUIDBuilder, UUri,
 };
 use zenoh::config::Config;
+
+struct RpcListener {
+    up_client: Arc<UPClientZenoh>,
+}
+impl RpcListener {
+    fn new(up_client: Arc<UPClientZenoh>) -> Self {
+        RpcListener { up_client }
+    }
+}
+#[async_trait]
+impl UListener for RpcListener {
+    async fn on_receive(&self, msg: UMessage) {
+        let UMessage {
+            attributes,
+            payload,
+            ..
+        } = msg;
+        // Build the payload to send back
+        if let Data::Value(v) = payload.unwrap().data.unwrap() {
+            let value = v.into_iter().map(|c| c as char).collect::<String>();
+            let source = attributes.clone().unwrap().source.unwrap();
+            let sink = attributes.clone().unwrap().sink.unwrap();
+            println!("Receive {value} from {source} to {sink}");
+        }
+        // Send back result
+        let umessage = UMessageBuilder::response_for_request(&attributes)
+            .with_message_id(UUIDBuilder::build())
+            .build_with_payload(
+                // Get current time
+                format!("{}", Utc::now()).as_bytes().to_vec().into(),
+                UPayloadFormat::UPAYLOAD_FORMAT_TEXT,
+            )
+            .unwrap();
+        block_on(self.up_client.send(umessage)).unwrap();
+    }
+    async fn on_error(&self, err: UStatus) {
+        panic!("Internal Error: {err:?}");
+    }
+}
 
 #[async_std::main]
 async fn main() {
@@ -29,7 +67,25 @@ async fn main() {
     env_logger::init();
 
     println!("uProtocol RPC server example");
-    let rpc_server = Arc::new(UPClientZenoh::new(Config::default()).await.unwrap());
+    let rpc_server = Arc::new(
+        UPClientZenoh::new(
+            Config::default(),
+            UAuthority {
+                name: Some("auth_name".to_string()),
+                number: Some(Number::Id(vec![1, 2, 3, 4])),
+                ..Default::default()
+            },
+            UEntity {
+                name: "entity_rpc_server".to_string(),
+                id: Some(3),
+                version_major: Some(1),
+                version_minor: None,
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap(),
+    );
 
     // create uuri
     let uuri = UUri {
@@ -48,52 +104,9 @@ async fn main() {
         ..Default::default()
     };
 
-    let rpc_server_cloned = rpc_server.clone();
-    let callback = move |result: Result<UMessage, UStatus>| {
-        match result {
-            Ok(msg) => {
-                let UMessage {
-                    attributes,
-                    payload,
-                    ..
-                } = msg;
-                // Get the UUri
-                let source = attributes.clone().unwrap().source.unwrap();
-                let sink = attributes.clone().unwrap().sink.unwrap();
-                // Build the payload to send back
-                if let Data::Value(v) = payload.unwrap().data.unwrap() {
-                    let value = v.into_iter().map(|c| c as char).collect::<String>();
-                    println!("Receive {value} from {source} to {sink}");
-                }
-                // Get current time
-                let upayload = UPayload {
-                    length: Some(0),
-                    format: UPayloadFormat::UPAYLOAD_FORMAT_TEXT.into(),
-                    data: Some(Data::Value(format!("{}", Utc::now()).as_bytes().to_vec())),
-                    ..Default::default()
-                };
-                // Set the attributes type to Response
-                let mut uattributes = attributes.unwrap();
-                uattributes.type_ = UMessageType::UMESSAGE_TYPE_RESPONSE.into();
-                uattributes.sink = Some(source.clone()).into();
-                uattributes.source = Some(sink.clone()).into();
-                // Send back result
-                block_on(rpc_server_cloned.send(UMessage {
-                    attributes: Some(uattributes).into(),
-                    payload: Some(upayload).into(),
-                    ..Default::default()
-                }))
-                .unwrap();
-            }
-            Err(ustatus) => {
-                println!("Internal Error: {ustatus:?}");
-            }
-        }
-    };
-
     println!("Register the listener...");
     rpc_server
-        .register_rpc_listener(uuri, Box::new(callback))
+        .register_listener(uuri, Arc::new(RpcListener::new(rpc_server.clone())))
         .await
         .unwrap();
 

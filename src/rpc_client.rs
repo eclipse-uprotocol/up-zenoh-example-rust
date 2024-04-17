@@ -13,9 +13,8 @@
 //
 use up_client_zenoh::UPClientZenoh;
 use up_rust::{
-    rpc::{CallOptionsBuilder, RpcClient},
-    uprotocol::{Data, UEntity, UPayload, UPayloadFormat, UUri},
-    uri::builder::resourcebuilder::UResourceBuilder,
+    CallOptions, Data, Number, RpcClient, UAuthority, UEntity, UPayload, UPayloadFormat,
+    UResourceBuilder, UUri,
 };
 use zenoh::config::Config;
 
@@ -25,7 +24,23 @@ async fn main() {
     env_logger::init();
 
     println!("uProtocol RPC client example");
-    let rpc_client = UPClientZenoh::new(Config::default()).await.unwrap();
+    let rpc_client = UPClientZenoh::new(
+        Config::default(),
+        UAuthority {
+            name: Some("auth_name".to_string()),
+            number: Some(Number::Id(vec![1, 2, 3, 4])),
+            ..Default::default()
+        },
+        UEntity {
+            name: "entity_rpc_client".to_string(),
+            id: Some(4),
+            version_major: Some(1),
+            version_minor: None,
+            ..Default::default()
+        },
+    )
+    .await
+    .unwrap();
 
     // create uuri
     let uuri = UUri {
@@ -56,7 +71,14 @@ async fn main() {
     // invoke RPC method
     println!("Send request to {uuri}");
     let result = rpc_client
-        .invoke_method(uuri, payload, CallOptionsBuilder::default().build())
+        .invoke_method(
+            uuri,
+            payload,
+            CallOptions {
+                ttl: 1000,
+                ..Default::default()
+            },
+        )
         .await;
 
     // process the result
