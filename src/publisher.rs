@@ -11,14 +11,13 @@
 // Contributors:
 //   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 //
+pub mod common_uuri;
+
 use async_std::task;
+use common_uuri::ExampleType;
 use std::time;
 use up_client_zenoh::UPClientZenoh;
-use up_rust::{
-    transport::{builder::UMessageBuilder, datamodel::UTransport},
-    uprotocol::{UEntity, UPayloadFormat, UResource, UUri},
-    uuid::builder::UUIDBuilder,
-};
+use up_rust::{UMessageBuilder, UPayloadFormat, UTransport, UUIDBuilder, UUri};
 use zenoh::config::Config;
 
 #[async_std::main]
@@ -27,34 +26,27 @@ async fn main() {
     env_logger::init();
 
     println!("uProtocol publisher example");
-    let publisher = UPClientZenoh::new(Config::default()).await.unwrap();
+    let publisher = UPClientZenoh::new(
+        Config::default(),
+        common_uuri::authority(),
+        common_uuri::entity(&ExampleType::Publisher),
+    )
+    .await
+    .unwrap();
 
     // create uuri
     let uuri = UUri {
-        entity: Some(UEntity {
-            name: "body.access".to_string(),
-            version_major: Some(1),
-            id: Some(1234),
-            ..Default::default()
-        })
-        .into(),
-        resource: Some(UResource {
-            name: "door".to_string(),
-            instance: Some("front_left".to_string()),
-            message: Some("Door".to_string()),
-            id: Some(5678),
-            ..Default::default()
-        })
-        .into(),
+        entity: Some(common_uuri::entity(&ExampleType::Publisher)).into(),
+        resource: Some(common_uuri::pub_resource()).into(),
         ..Default::default()
     };
 
     let mut cnt: u64 = 0;
     loop {
         let data = format!("{cnt}");
-        let umessage = UMessageBuilder::publish(&uuri)
+        let umessage = UMessageBuilder::publish(uuri.clone())
+            .with_message_id(UUIDBuilder::build())
             .build_with_payload(
-                &UUIDBuilder::new(),
                 data.as_bytes().to_vec().into(),
                 UPayloadFormat::UPAYLOAD_FORMAT_TEXT,
             )

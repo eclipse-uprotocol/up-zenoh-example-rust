@@ -11,12 +11,11 @@
 // Contributors:
 //   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 //
+pub mod common_uuri;
+
+use common_uuri::ExampleType;
 use up_client_zenoh::UPClientZenoh;
-use up_rust::{
-    rpc::{CallOptionsBuilder, RpcClient},
-    uprotocol::{Data, UEntity, UPayload, UPayloadFormat, UUri},
-    uri::builder::resourcebuilder::UResourceBuilder,
-};
+use up_rust::{CallOptions, Data, RpcClient, UPayload, UPayloadFormat, UUri};
 use zenoh::config::Config;
 
 #[async_std::main]
@@ -25,22 +24,18 @@ async fn main() {
     env_logger::init();
 
     println!("uProtocol RPC client example");
-    let rpc_client = UPClientZenoh::new(Config::default()).await.unwrap();
+    let rpc_client = UPClientZenoh::new(
+        Config::default(),
+        common_uuri::authority(),
+        common_uuri::entity(&ExampleType::RpcClient),
+    )
+    .await
+    .unwrap();
 
     // create uuri
     let uuri = UUri {
-        entity: Some(UEntity {
-            name: "test_rpc.app".to_string(),
-            version_major: Some(1),
-            id: Some(1234),
-            ..Default::default()
-        })
-        .into(),
-        resource: Some(UResourceBuilder::for_rpc_request(
-            Some("getTime".to_string()),
-            Some(5678),
-        ))
-        .into(),
+        entity: Some(common_uuri::entity(&ExampleType::RpcServer)).into(),
+        resource: Some(common_uuri::rpc_resource()).into(),
         ..Default::default()
     };
 
@@ -56,7 +51,14 @@ async fn main() {
     // invoke RPC method
     println!("Send request to {uuri}");
     let result = rpc_client
-        .invoke_method(uuri, payload, CallOptionsBuilder::default().build())
+        .invoke_method(
+            uuri,
+            payload,
+            CallOptions {
+                ttl: 1000,
+                ..Default::default()
+            },
+        )
         .await;
 
     // process the result
