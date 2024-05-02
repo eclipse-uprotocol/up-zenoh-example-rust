@@ -19,7 +19,6 @@ use common_uuri::ExampleType;
 use std::{sync::Arc, time};
 use up_client_zenoh::UPClientZenoh;
 use up_rust::{Data, UListener, UMessage, UStatus, UTransport, UUri};
-use zenoh::config::Config;
 
 struct SubscriberListener;
 #[async_trait]
@@ -43,7 +42,7 @@ async fn main() {
 
     println!("uProtocol subscriber example");
     let subscriber = UPClientZenoh::new(
-        Config::default(),
+        common_uuri::get_zenoh_config(),
         common_uuri::authority(),
         common_uuri::entity(&ExampleType::Subscriber),
     )

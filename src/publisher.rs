@@ -18,7 +18,6 @@ use common_uuri::ExampleType;
 use std::time;
 use up_client_zenoh::UPClientZenoh;
 use up_rust::{UMessageBuilder, UPayloadFormat, UTransport, UUIDBuilder, UUri};
-use zenoh::config::Config;
 
 #[async_std::main]
 async fn main() {
@@ -27,7 +26,7 @@ async fn main() {
 
     println!("uProtocol publisher example");
     let publisher = UPClientZenoh::new(
-        Config::default(),
+        common_uuri::get_zenoh_config(),
         common_uuri::authority(),
         common_uuri::entity(&ExampleType::Publisher),
     )

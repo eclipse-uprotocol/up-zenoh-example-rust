@@ -13,6 +13,7 @@
 //
 
 use up_rust::{Number, UAuthority, UEntity, UResource, UResourceBuilder};
+use zenoh::config::Config;
 
 pub enum ExampleType {
     Publisher,
@@ -60,4 +61,20 @@ pub fn pub_resource() -> UResource {
 #[allow(clippy::must_use_candidate)]
 pub fn rpc_resource() -> UResource {
     UResourceBuilder::for_rpc_request(Some("getTime".to_string()), Some(5678))
+}
+
+#[allow(clippy::must_use_candidate, clippy::missing_panics_doc)]
+pub fn get_zenoh_config() -> Config {
+    // Load the config from file path
+    // Config Examples: https://github.com/eclipse-zenoh/zenoh/blob/0.10.1-rc/DEFAULT_CONFIG.json5
+    // let mut zenoh_cfg = Config::from_file("./DEFAULT_CONFIG.json5").unwrap();
+
+    // Loat the default config struct
+    let mut zenoh_cfg = Config::default();
+    // You can choose from Router, Peer, Client
+    zenoh_cfg
+        .set_mode(Some(zenoh::config::WhatAmI::Peer))
+        .unwrap();
+
+    zenoh_cfg
 }
