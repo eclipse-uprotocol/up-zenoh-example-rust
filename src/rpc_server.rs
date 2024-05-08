@@ -23,7 +23,6 @@ use up_rust::{
     Data, UListener, UMessage, UMessageBuilder, UPayloadFormat, UStatus, UTransport, UUIDBuilder,
     UUri,
 };
-use zenoh::config::Config;
 
 struct RpcListener {
     up_client: Arc<UPClientZenoh>,
@@ -72,7 +71,7 @@ async fn main() {
     println!("uProtocol RPC server example");
     let rpc_server = Arc::new(
         UPClientZenoh::new(
-            Config::default(),
+            common_uuri::get_zenoh_config(),
             common_uuri::authority(),
             common_uuri::entity(&ExampleType::RpcServer),
         )

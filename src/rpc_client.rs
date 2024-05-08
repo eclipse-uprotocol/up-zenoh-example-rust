@@ -16,7 +16,6 @@ pub mod common_uuri;
 use common_uuri::ExampleType;
 use up_client_zenoh::UPClientZenoh;
 use up_rust::{CallOptions, Data, RpcClient, UPayload, UPayloadFormat, UUri};
-use zenoh::config::Config;
 
 #[async_std::main]
 async fn main() {
@@ -25,7 +24,7 @@ async fn main() {
 
     println!("uProtocol RPC client example");
     let rpc_client = UPClientZenoh::new(
-        Config::default(),
+        common_uuri::get_zenoh_config(),
         common_uuri::authority(),
         common_uuri::entity(&ExampleType::RpcClient),
     )
