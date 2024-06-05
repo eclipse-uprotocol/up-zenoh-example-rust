@@ -10,60 +10,38 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
-pub mod common_uuri;
+pub mod common;
 
-use common_uuri::ExampleType;
+use std::str::FromStr;
 use up_client_zenoh::UPClientZenoh;
-use up_rust::{CallOptions, Data, RpcClient, UPayload, UPayloadFormat, UUri};
+use up_rust::{RpcClient, UMessageBuilder, UPayloadFormat, UUri};
 
-#[async_std::main]
+#[tokio::main]
 async fn main() {
     // initiate logging
     env_logger::init();
 
     println!("uProtocol RPC client example");
-    let rpc_client = UPClientZenoh::new(
-        common_uuri::get_zenoh_config(),
-        common_uuri::authority(),
-        common_uuri::entity(&ExampleType::RpcClient),
-    )
-    .await
-    .unwrap();
+    let rpc_client = UPClientZenoh::new(common::get_zenoh_config(), String::from("rpc_client"))
+        .await
+        .unwrap();
 
     // create uuri
-    let uuri = UUri {
-        entity: Some(common_uuri::entity(&ExampleType::RpcServer)).into(),
-        resource: Some(common_uuri::rpc_resource()).into(),
-        ..Default::default()
-    };
+    let src_uuri = UUri::from_str("//rpc_client/1/1/0").unwrap();
+    let sink_uuri = UUri::from_str("//rpc_server/1/1/1").unwrap();
 
     // create uPayload
     let data = String::from("GetCurrentTime");
-    let payload = UPayload {
-        length: Some(0),
-        format: UPayloadFormat::UPAYLOAD_FORMAT_TEXT.into(),
-        data: Some(Data::Value(data.as_bytes().to_vec())),
-        ..Default::default()
-    };
+    let umsg = UMessageBuilder::request(sink_uuri.clone(), src_uuri.clone(), 1000)
+        .build_with_payload(data, UPayloadFormat::UPAYLOAD_FORMAT_TEXT)
+        .unwrap();
 
     // invoke RPC method
-    println!("Send request to {uuri}");
-    let result = rpc_client
-        .invoke_method(
-            uuri,
-            payload,
-            CallOptions {
-                ttl: 1000,
-                ..Default::default()
-            },
-        )
-        .await;
+    println!("Send request from {src_uuri} to {sink_uuri}");
+    let result = rpc_client.invoke_method(sink_uuri, umsg).await;
 
     // process the result
-    if let Data::Value(v) = result.unwrap().payload.unwrap().data.unwrap() {
-        let value = v.into_iter().map(|c| c as char).collect::<String>();
-        println!("Receive {value}");
-    } else {
-        println!("Failed to get result from invoke_method.");
-    }
+    let payload = result.unwrap().payload.unwrap();
+    let value = payload.into_iter().map(|c| c as char).collect::<String>();
+    println!("Receive {value}");
 }
