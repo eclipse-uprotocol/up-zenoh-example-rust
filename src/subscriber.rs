@@ -15,8 +15,8 @@ pub mod common;
 use async_trait::async_trait;
 use std::{str::FromStr, sync::Arc};
 use tokio::time::{sleep, Duration};
-use up_client_zenoh::UPClientZenoh;
 use up_rust::{UListener, UMessage, UStatus, UTransport, UUri};
+use up_transport_zenoh::UPClientZenoh;
 
 struct SubscriberListener;
 #[async_trait]

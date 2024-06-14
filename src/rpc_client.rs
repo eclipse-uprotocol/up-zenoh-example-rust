@@ -13,8 +13,8 @@
 pub mod common;
 
 use std::str::FromStr;
-use up_client_zenoh::UPClientZenoh;
 use up_rust::{RpcClient, UMessageBuilder, UPayloadFormat, UUri};
+use up_transport_zenoh::UPClientZenoh;
 
 #[tokio::main]
 async fn main() {

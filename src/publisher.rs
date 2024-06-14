@@ -14,8 +14,8 @@ pub mod common;
 
 use std::str::FromStr;
 use tokio::time::{sleep, Duration};
-use up_client_zenoh::UPClientZenoh;
 use up_rust::{UMessageBuilder, UPayloadFormat, UTransport, UUri};
+use up_transport_zenoh::UPClientZenoh;
 
 #[tokio::main]
 async fn main() {

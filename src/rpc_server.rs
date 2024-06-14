@@ -20,8 +20,8 @@ use tokio::{
     task,
     time::{sleep, Duration},
 };
-use up_client_zenoh::UPClientZenoh;
 use up_rust::{UListener, UMessage, UMessageBuilder, UPayloadFormat, UStatus, UTransport, UUri};
+use up_transport_zenoh::UPClientZenoh;
 
 struct RpcListener {
     up_client: Arc<UPClientZenoh>,

@@ -18,8 +18,7 @@ chrono = "0.4.31"
 env_logger = "0.10.0"
 tokio = { version = "1.35.1", default-features = false }
 up-rust = { git = "https://github.com/eclipse-uprotocol/up-rust", rev = "d736fdf35ff4728effa7f36b720f0fc1605d5ba0" }
-#up-client-zenoh = { git = "https://github.com/eclipse-uprotocol/up-client-zenoh-rust", rev = "cb592dc5abbaf9dcd204f592733404ea7c61e999" }
-up-client-zenoh = { git = "https://github.com/ZettaScaleLabs/up-client-zenoh-rust", rev = "70e45bad74ce31b4d464333efa21217f5f7c63c8" }
+up-transport-zenoh = { git = "https://github.com/eclipse-uprotocol/up-transport-zenoh-rust", rev = "b8925c643465959f402372f796c8856f906dcd05" }
 zenoh = { version = "0.11.0-rc.3", features = ["unstable"]}
 
 [[bin]]
