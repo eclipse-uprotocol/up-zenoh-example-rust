@@ -10,48 +10,35 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
-pub mod common_uuri;
+pub mod common;
 
-use async_std::task;
-use common_uuri::ExampleType;
-use std::time;
-use up_client_zenoh::UPClientZenoh;
-use up_rust::{UMessageBuilder, UPayloadFormat, UTransport, UUIDBuilder, UUri};
+use std::str::FromStr;
+use tokio::time::{sleep, Duration};
+use up_rust::{UMessageBuilder, UPayloadFormat, UTransport, UUri};
+use up_transport_zenoh::UPClientZenoh;
 
-#[async_std::main]
+#[tokio::main]
 async fn main() {
     // initiate logging
     env_logger::init();
 
     println!("uProtocol publisher example");
-    let publisher = UPClientZenoh::new(
-        common_uuri::get_zenoh_config(),
-        common_uuri::authority(),
-        common_uuri::entity(&ExampleType::Publisher),
-    )
-    .await
-    .unwrap();
+    let publisher = UPClientZenoh::new(common::get_zenoh_config(), String::from("publisher"))
+        .await
+        .unwrap();
 
     // create uuri
-    let uuri = UUri {
-        entity: Some(common_uuri::entity(&ExampleType::Publisher)).into(),
-        resource: Some(common_uuri::pub_resource()).into(),
-        ..Default::default()
-    };
+    let uuri = UUri::from_str("//publisher/1/1/8001").unwrap();
 
     let mut cnt: u64 = 0;
     loop {
         let data = format!("{cnt}");
         let umessage = UMessageBuilder::publish(uuri.clone())
-            .with_message_id(UUIDBuilder::build())
-            .build_with_payload(
-                data.as_bytes().to_vec().into(),
-                UPayloadFormat::UPAYLOAD_FORMAT_TEXT,
-            )
+            .build_with_payload(data.clone(), UPayloadFormat::UPAYLOAD_FORMAT_TEXT)
             .unwrap();
         println!("Sending {data} to {uuri}...");
         publisher.send(umessage).await.unwrap();
-        task::sleep(time::Duration::from_millis(1000)).await;
+        sleep(Duration::from_millis(1000)).await;
         cnt += 1;
     }
 }

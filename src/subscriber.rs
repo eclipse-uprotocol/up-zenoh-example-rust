@@ -10,58 +10,48 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
-pub mod common_uuri;
+pub mod common;
 
-use async_std::task;
 use async_trait::async_trait;
-use common_uuri::ExampleType;
-use std::{sync::Arc, time};
-use up_client_zenoh::UPClientZenoh;
-use up_rust::{Data, UListener, UMessage, UStatus, UTransport, UUri};
+use std::{str::FromStr, sync::Arc};
+use tokio::time::{sleep, Duration};
+use up_rust::{UListener, UMessage, UStatus, UTransport, UUri};
+use up_transport_zenoh::UPClientZenoh;
 
 struct SubscriberListener;
 #[async_trait]
 impl UListener for SubscriberListener {
     async fn on_receive(&self, msg: UMessage) {
-        if let Data::Value(v) = msg.payload.unwrap().data.unwrap() {
-            let value = v.into_iter().map(|c| c as char).collect::<String>();
-            let uri = msg.attributes.unwrap().source.unwrap().to_string();
-            println!("Receiving {value} from {uri}");
-        }
+        let payload = msg.payload.unwrap();
+        let value = payload.into_iter().map(|c| c as char).collect::<String>();
+        let uri = msg.attributes.unwrap().source.unwrap().to_string();
+        println!("Receiving {value} from {uri}");
     }
     async fn on_error(&self, err: UStatus) {
         panic!("Internal Error: {err:?}");
     }
 }
 
-#[async_std::main]
+#[tokio::main]
 async fn main() {
     // initiate logging
     env_logger::init();
 
     println!("uProtocol subscriber example");
-    let subscriber = UPClientZenoh::new(
-        common_uuri::get_zenoh_config(),
-        common_uuri::authority(),
-        common_uuri::entity(&ExampleType::Subscriber),
-    )
-    .await
-    .unwrap();
+    let subscriber = UPClientZenoh::new(common::get_zenoh_config(), String::from("subscriber"))
+        .await
+        .unwrap();
 
     // create uuri
-    let uuri = UUri {
-        entity: Some(common_uuri::entity(&ExampleType::Publisher)).into(),
-        resource: Some(common_uuri::pub_resource()).into(),
-        ..Default::default()
-    };
+    let uuri = UUri::from_str("//publisher/1/1/8001").unwrap();
 
     println!("Register the listener...");
     subscriber
-        .register_listener(uuri, Arc::new(SubscriberListener {}))
+        .register_listener(&uuri, None, Arc::new(SubscriberListener {}))
         .await
         .unwrap();
 
     loop {
-        task::sleep(time::Duration::from_millis(1000)).await;
+        sleep(Duration::from_millis(1000)).await;
     }
 }
