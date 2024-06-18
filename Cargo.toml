@@ -17,8 +17,8 @@ async-trait = "0.1"
 chrono = "0.4.31"
 env_logger = "0.10.0"
 tokio = { version = "1.35.1", default-features = false }
-up-rust = { git = "https://github.com/eclipse-uprotocol/up-rust", rev = "d736fdf35ff4728effa7f36b720f0fc1605d5ba0" }
-up-transport-zenoh = { git = "https://github.com/eclipse-uprotocol/up-transport-zenoh-rust", rev = "b8925c643465959f402372f796c8856f906dcd05" }
+up-rust = { git = "https://github.com/eclipse-uprotocol/up-rust", rev = "3a50104421a801d52e1d9c68979db54c013ce43d" }
+up-transport-zenoh = { git = "https://github.com/eclipse-uprotocol/up-transport-zenoh-rust", rev = "7c839e7a94f526a82027564a609f48a79a3f4eae" }
 zenoh = { version = "0.11.0-rc.3", features = ["unstable"]}
 
 [[bin]]
