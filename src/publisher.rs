@@ -20,7 +20,7 @@ use up_transport_zenoh::UPClientZenoh;
 #[tokio::main]
 async fn main() {
     // initiate logging
-    env_logger::init();
+    UPClientZenoh::try_init_log_from_env();
 
     println!("uProtocol publisher example");
     let publisher = UPClientZenoh::new(common::get_zenoh_config(), String::from("publisher"))

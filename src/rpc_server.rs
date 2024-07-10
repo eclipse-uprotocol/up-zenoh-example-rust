@@ -72,7 +72,7 @@ impl UListener for RpcListener {
 #[tokio::main]
 async fn main() {
     // initiate logging
-    env_logger::init();
+    UPClientZenoh::try_init_log_from_env();
 
     println!("uProtocol RPC server example");
     let rpc_server = Arc::new(

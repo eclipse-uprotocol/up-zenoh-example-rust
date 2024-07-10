@@ -19,7 +19,7 @@ use up_transport_zenoh::UPClientZenoh;
 #[tokio::main]
 async fn main() {
     // initiate logging
-    env_logger::init();
+    UPClientZenoh::try_init_log_from_env();
 
     println!("uProtocol RPC client example");
     let rpc_client = UPClientZenoh::new(common::get_zenoh_config(), String::from("rpc_client"))
