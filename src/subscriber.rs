@@ -35,7 +35,7 @@ impl UListener for SubscriberListener {
 #[tokio::main]
 async fn main() {
     // initiate logging
-    env_logger::init();
+    UPClientZenoh::try_init_log_from_env();
 
     println!("uProtocol subscriber example");
     let subscriber = UPClientZenoh::new(common::get_zenoh_config(), String::from("subscriber"))

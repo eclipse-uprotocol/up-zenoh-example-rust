@@ -1,6 +1,6 @@
 # up-zenoh-example-rust
 
-Example code of using [up-client-zenoh-rust](https://github.com/eclipse-uprotocol/up-client-zenoh-rust)
+Example code of using [up-transport-zenoh-rust](https://github.com/eclipse-uprotocol/up-transport-zenoh-rust)
 
 ## Build
 
