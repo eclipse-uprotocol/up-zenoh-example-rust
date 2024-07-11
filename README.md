@@ -1,5 +1,7 @@
 # up-zenoh-example-rust
 
+**NOTE**: The repository is no longer available since the examples is moved back to [up-transport-zenoh-rust](https://github.com/eclipse-uprotocol/up-transport-zenoh-rust) now
+
 Example code of using [up-transport-zenoh-rust](https://github.com/eclipse-uprotocol/up-transport-zenoh-rust)
 
 ## Build
